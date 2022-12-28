@@ -18,7 +18,8 @@
   },
   "homepage": "https://github.com/webfaisalbd/mongodb-basics-ai#readme",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "mongoose": "^6.8.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
