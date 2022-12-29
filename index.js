@@ -5,6 +5,9 @@ const app = express();
 
 const PORT = 3246;
 
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+
 // mongoose.connect('mongodb://localhost:27017/testCustomers')
 //     .then(() => console.log('mongodb is connected')
 //     )
@@ -22,15 +25,16 @@ const productsSchema = new mongoose.Schema({
     },
     price: Number,
     description: String,
-    createdAt : {
+    createdAt: {
         type: Date,
         default: Date.now
     }
 })
-
+// create product model 
 const Product = mongoose.model("products", productsSchema);
 
-const mongoDB = async () => {
+
+const connectDB = async () => {
     await mongoose.connect('mongodb://localhost:27017/testCustomers')
         .then(() => console.log('mongodb is connected')
         )
@@ -41,10 +45,37 @@ const mongoDB = async () => {
 }
 
 app.get('/', (req, res) => {
-    res.send("<h2>Get All the data</h2>")
+    res.send("Get All the products.")
+})
+
+app.post('/products', async (req, res) => {
+    try {
+        // get data form request body
+        const title = req.body.title;
+        const price = req.body.price;
+        const description = req.body.description;
+
+        const newProduct = new Product({
+            title: title,
+            price: price,
+            description: description
+        });
+
+        const productData = await newProduct.save();
+
+        // const newProduct = new Product({
+        //     title: req.body.title,
+        //     price: req.body.price,
+        //     description: req.body.description,
+        // });
+
+        res.status(201).send(productData)
+    } catch (error) {
+        res.status(500).send({ message: error.message })
+    }
 })
 
 app.listen(PORT, async () => {
     console.log(`server is running at http://localhost:${PORT}`);
-    await mongoDB();
+    await connectDB();
 })
