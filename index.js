@@ -55,13 +55,26 @@ app.post('/products', async (req, res) => {
         const price = req.body.price;
         const description = req.body.description;
 
-        const newProduct = new Product({
-            title: title,
-            price: price,
-            description: description
-        });
+        // const newProduct = new Product({
+        //     title: title,
+        //     price: price,
+        //     description: description
+        // });
 
-        const productData = await newProduct.save();
+        // const productData = await newProduct.save();
+
+        const productData = await Product.insertMany([
+            {
+                title: "iphone 5",
+                price: 550,
+                description: "this is iphone 5"
+            },
+            {
+                title: "iphone 6",
+                price: 660,
+                description: "this is iphone 6"
+            }
+        ])
 
         // const newProduct = new Product({
         //     title: req.body.title,
