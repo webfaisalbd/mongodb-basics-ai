@@ -2,22 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const app = express();
-
-const PORT = 3246;
-
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
-// mongoose.connect('mongodb://localhost:27017/testCustomers')
-//     .then(() => console.log('mongodb is connected')
-//     )
-//     .catch(() => {
-//         console.log("mongodb is not connected");
-//         console.log(error);
-//     })
+const PORT = 4000;
 
-
-// create product schema 
+// product schema 
 const productsSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -30,62 +20,36 @@ const productsSchema = new mongoose.Schema({
         default: Date.now
     }
 })
-// create product model 
-const Product = mongoose.model("products", productsSchema);
-
+// product model 
+const Product = mongoose.model("Products", productsSchema)
 
 const connectDB = async () => {
-    await mongoose.connect('mongodb://localhost:27017/testCustomers')
-        .then(() => console.log('mongodb is connected')
-        )
-        .catch(() => {
-            console.log("mongodb is not connected");
-            console.log(error);
-        })
+    try {
+        await mongoose.connect('mongodb://localhost:27017/school')
+        console.log("mongodb is connected");
+    } catch (error) {
+        console.log("mongodb is not connected");
+        console.log(error.message);
+        process.exit(1);
+    }
 }
 
+
 app.get('/', (req, res) => {
-    res.send("Get All the products.")
+    res.send("Welcome to localhost");
 })
 
 app.post('/products', async (req, res) => {
     try {
-        // get data form request body
-        const title = req.body.title;
-        const price = req.body.price;
-        const description = req.body.description;
-
         const newProduct = new Product({
-            title: title,
-            price: price,
-            description: description
-        });
-
+            title: req.body.title,
+            price: req.body.price,
+            description: req.body.description,
+            rating: req.body.rating
+        })
         const productData = await newProduct.save();
 
-        // const newProduct = new Product({
-        //     title: req.body.title,
-        //     price: req.body.price,
-        //     description: req.body.description,
-        // });
-
         res.status(201).send(productData)
-    } catch (error) {
-        res.status(500).send({ message: error.message })
-    }
-})
-
-
-app.get('/products', async (req, res)=> {
-    try {
-      const products =  await Product.find();
-
-      if(products){
-          res.status(200).send(products)
-        }
-        else {
-          res.status(404).send({message : "products not found."})
-      }
 
     } catch (error) {
         res.status(500).send({ message: error.message })
@@ -93,6 +57,6 @@ app.get('/products', async (req, res)=> {
 })
 
 app.listen(PORT, async () => {
-    console.log(`server is running at http://localhost:${PORT}`);
+    console.log(`server running at port http://localhost:${PORT}`);
     await connectDB();
 })
