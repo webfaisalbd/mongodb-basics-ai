@@ -39,6 +39,46 @@ app.get('/', (req, res) => {
     res.send("Welcome to localhost");
 })
 
+app.get('/products', async (req, res) => {
+    try {
+        const price = req.query.price;
+        if (price) {
+            const products = await Product.find({ price: { $lt: price } });
+        }
+        else {
+            const products = await Product.find();
+        }
+        if (products) {
+            res.status(200).send(products);
+        }
+        else {
+            res.status(404).send({ message: "products not found" });
+        }
+
+    } catch (error) {
+        res.status(500).send({ message: error.message })
+    }
+})
+
+app.get('/products/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const product = await Product.findOne({ _id: id }).select({
+            _id: 0,
+            title: 1
+        });
+        if (product) {
+            res.status(200).send(product);
+        }
+        else {
+            res.status(404).send({ message: "specific product not found" });
+        }
+
+    } catch (error) {
+        res.status(500).send({ message: error.message })
+    }
+})
+
 app.post('/products', async (req, res) => {
     try {
         const newProduct = new Product({
@@ -49,7 +89,7 @@ app.post('/products', async (req, res) => {
         })
         const productData = await newProduct.save();
 
-        res.status(201).send(productData)
+        res.status(201).send(productData);
 
     } catch (error) {
         res.status(500).send({ message: error.message })
