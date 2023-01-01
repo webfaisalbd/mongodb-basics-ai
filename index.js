@@ -11,9 +11,19 @@ const PORT = 4000;
 const productsSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true
+        required: [true, "title must be provided"],
+        minlength: [3, "minimum length should be 3"],
+        maxlength: [30, "maximum length should be 10"],
+        trim: true,
+        unique: true,
+        index: true
     },
-    price: Number,
+    price: {
+        type: Number,
+        required: [true, "price must be provided"],
+        min: [100, "price must at least 100 euro"],
+        max: 10000
+    },
     description: String,
     rating: Number,
     createdAt: {
@@ -143,7 +153,7 @@ app.put('/products/:id', async (req, res) => {
                 $set: {
                     title: title,
                     price: price,
-
+                    description: description
                 }
             },
             { new: true }
