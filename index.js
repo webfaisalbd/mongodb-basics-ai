@@ -115,8 +115,9 @@ app.delete('/products/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const product = await Product.deleteOne({ _id: id })
+        // const product = await Product.findByIdAndDelete({ _id: id })
         if (product) {
-            res.status(200).send("product is deleted.");
+            res.status(200).send(product);
         }
         else {
             res.status(404).send("product not found.");
@@ -126,6 +127,39 @@ app.delete('/products/:id', async (req, res) => {
     }
 })
 
+// update 
+app.put('/products/:id', async (req, res) => { 
+    try {
+        const id = req.params.id;
+
+        const title = req.body.title;
+        const price = req.body.price;
+        const description = req.body.description;
+
+        const product = await Product.updateOne(
+            { _id: id },
+            // const product = await Product.findByIdAndUpdate({_id: id},{
+            {
+                $set: {
+                    title: title,
+                    price: price,
+
+                }
+            },
+            { new: true }
+        );
+        if (product) {
+            res.status(200).send(product);
+        }
+        else {
+            res.status(404).send("product is not updated.")
+        }
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+})
+
+// post 
 app.post('/products', async (req, res) => {
     try {
         const newProduct = new Product({
