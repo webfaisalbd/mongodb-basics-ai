@@ -12,11 +12,19 @@ const productsSchema = new mongoose.Schema({
     title: {
         type: String,
         required: [true, "title must be provided"],
-        minlength: [3, "minimum length should be 3"],
-        maxlength: [30, "maximum length should be 10"],
+        // minlength: [3, "minimum length should be 3"],
+        // maxlength: [30, "maximum length should be 10"],
         trim: true,
-        unique: true,
-        index: true
+        validate: {
+            validator: function (v) {
+                return (v.length > 3 && v.length < 10);
+            },
+            message: function (props) {
+                return `${props.value} is not a valid title.`
+            }
+        }
+
+
     },
     price: {
         type: Number,
@@ -29,6 +37,16 @@ const productsSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    phone: {
+        type: String,
+        required: true,
+        validate: {
+            validator: function (v) {
+                return /\d{3}-\d{3}-\d{4}/.test(v);
+            },
+            message: (props) => `${props.value} is not a valid phone`,
+        }
     }
 })
 // product model 
@@ -138,13 +156,14 @@ app.delete('/products/:id', async (req, res) => {
 })
 
 // update 
-app.put('/products/:id', async (req, res) => { 
+app.put('/products/:id', async (req, res) => {
     try {
         const id = req.params.id;
 
         const title = req.body.title;
         const price = req.body.price;
         const description = req.body.description;
+        const phone = req.body.phone;
 
         const product = await Product.updateOne(
             { _id: id },
@@ -153,7 +172,8 @@ app.put('/products/:id', async (req, res) => {
                 $set: {
                     title: title,
                     price: price,
-                    description: description
+                    description: description,
+                    phone: phone
                 }
             },
             { new: true }
@@ -176,7 +196,8 @@ app.post('/products', async (req, res) => {
             title: req.body.title,
             price: req.body.price,
             description: req.body.description,
-            rating: req.body.rating
+            rating: req.body.rating,
+            phone: req.body.phone
         })
         const productData = await newProduct.save();
 
