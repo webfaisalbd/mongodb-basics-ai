@@ -15,6 +15,7 @@ const productsSchema = new mongoose.Schema({
     },
     price: Number,
     description: String,
+    rating: Number,
     createdAt: {
         type: Date,
         default: Date.now
@@ -39,25 +40,55 @@ app.get('/', (req, res) => {
     res.send("Welcome to localhost");
 })
 
+// app.get('/products', async (req, res) => {
+//     try {
+//         const price = req.query.price;
+//         if (price) {
+//             const products = await Product.find({ price: { $lt: price } });
+//         }
+//         else {
+//             const products = await Product.find();
+//         }
+//         if (products) {
+//             res.status(200).send(products);
+//         }
+//         else {
+//             res.status(404).send({ message: "products not found" });
+//         }
+
+//     } catch (error) {
+//         res.status(500).send({ message: error.message })
+//     }
+// })
+
 app.get('/products', async (req, res) => {
+
     try {
         const price = req.query.price;
+
+        let products;
+
         if (price) {
-            const products = await Product.find({ price: { $lt: price } });
+            products = await Product.find({ price: { $gt: price } }).sort({ price: -1 });
         }
         else {
-            const products = await Product.find();
-        }
-        if (products) {
-            res.status(200).send(products);
-        }
-        else {
-            res.status(404).send({ message: "products not found" });
+            products = await Product.find().countDocuments();
         }
 
+        if (products) {
+            res.status(200).send({
+                success: true,
+                data : products
+            });
+        }
+        else {
+            res.status(404).send("products not found");
+        }
     } catch (error) {
-        res.status(500).send({ message: error.message })
+        res.status(500).send({ message: error.message });
     }
+
+
 })
 
 app.get('/products/:id', async (req, res) => {
