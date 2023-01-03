@@ -40,32 +40,97 @@ const schoolManagementSchema = new mongoose.Schema({
 const SchoolManagementModel = mongoose.model("students", schoolManagementSchema);
 
 
-
-// get students
-app.get("/students", async (req, res) => {
+// delete 
+app.delete('/students/:id', async (req,res)=> {
     try {
-        const students = await SchoolManagementModel.find();
-        if (students) {
-            res.status(201).send(students);
-        } else {
-            res.status(404).send("students not found.");
+        const id = req.params.id;
+        const deleted = await SchoolManagementModel.findByIdAndDelete({_id: id});
+        if(deleted){
+            res.status(201).send(deleted);
+        }
+        else {
+            res.status(404).send("not deleted");
+        }
+    } catch (error) {
+        res.status(500).send({message: error.message});
+    }
+})
+
+// update 
+app.put("/students/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const studentClassName = req.body.studentClassName;
+        const studentNumber = req.body.studentNumber;
+        const studentGolden = req.body.studentGolden;
+
+        const student = await SchoolManagementModel.findByIdAndUpdate(
+            { _id: id },
+            {
+                $set: {
+                    studentClassName: studentClassName,
+                    studentNumber: studentNumber,
+                    studentGolden: studentGolden
+                }
+            },
+            { new: true }
+        )
+        if (student) {
+            res.status(200).send(student);
+        }
+        else {
+            res.status(404).send("student not updated");
         }
     } catch (error) {
         res.status(500).send({ message: error.message });
     }
 })
 
-// get specific students
-app.get('/students/:id', async (req, res) => {
-    try {
-        const id = req.params.id;
+// get all students
+// app.get("/students", async (req, res) => {
+//     try {
+//         const students = await SchoolManagementModel.find();
+//         if (students) {
+//             res.status(201).send(students);
+//         } else {
+//             res.status(404).send("students not found.");
+//         }
+//     } catch (error) {
+//         res.status(500).send({ message: error.message });
+//     }
+// })
 
-        const student = await SchoolManagementModel.find({ _id: id }).select({ _id: 0 })
-        if (student) {
-            res.status(201).send(student);
+// get specific students using params
+// app.get('/students/:id', async (req, res) => {
+//     try {
+//         const id = req.params.id;
+
+//         const student = await SchoolManagementModel.find({ _id: id })
+//         if (student) {
+//             res.status(201).send(student);
+//         } else {
+//             res.status(404).send("student not found.");
+//         }
+//     } catch (error) {
+//         res.status(500).send({ message: error.message });
+//     }
+// })
+
+// get specific students using query parameter,
+// if there is no query parameter, then show all get students 
+app.get('/students', async (req, res) => {
+    try {
+        const studentClassName = req.query.studentClassName;
+
+        if (studentClassName) {
+            const student = await SchoolManagementModel.find({ studentClassName: studentClassName });
+            res.send(student);
         } else {
-            res.status(404).send("student not found.");
+            const student = await SchoolManagementModel.find();
+            res.send(student);
         }
+
     } catch (error) {
         res.status(500).send({ message: error.message });
     }
